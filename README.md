@@ -19,10 +19,11 @@ Este projeto implementa o jogo de adivinhação utilizando uma arquitetura com D
 
 1. Clone o repositório:
 
-   ```bash
-   git clone https://github.com/fams/guess_game.git
-   cd guess-game
-   ```
+## Clonar o repositório
+
+```bash
+git clone https://github.com/VtRodrigues96/Guess_Game_at1_Docker.git
+cd Guess_Game_at1_Docker
 
 1. Subir os containers
 
