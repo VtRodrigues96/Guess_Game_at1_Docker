@@ -10,10 +10,10 @@ Guess Game - Docker Compose
 
 Este projeto implementa o jogo de adivinhação utilizando uma arquitetura com Docker Compose, contendo:
 
-Backend em Flask (Python)
-Frontend em React servido via NGINX
-Banco de dados PostgreSQL
-NGINX atuando como proxy reverso e balanceador de carga do backend
+* Backend em Flask (Python)
+* Frontend em React servido via NGINX
+* Banco de dados PostgreSQL
+* NGINX atuando como proxy reverso e balanceador de carga do backend
 
 ## Instalação
 
@@ -60,7 +60,7 @@ Após a aplição será gerado um Guess ID onde poderá testar através do segui
 
 5. Consulta a tabela Postgres. Aplique o prompt abaixo para acessar o banco:
 
-   docker exec -it postgres psql -U postgres -d postgres
+       docker exec -it postgres psql -U postgres -d postgres
 
 Aplique \dt e o seguinte código SQL:
 
