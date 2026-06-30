@@ -413,4 +413,4 @@ docker compose up -d --build
 
 Vitor Rodrigues
 
-Projeto desenvolvido para a atividade de Docker Compose utilizando o projeto Guess Game.
+Projeto desenvolvido para a atividade 1 de Docker utilizando o projeto Guess Game.
