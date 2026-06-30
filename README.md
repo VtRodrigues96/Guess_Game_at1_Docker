@@ -28,7 +28,7 @@ NGINX atuando como proxy reverso e balanceador de carga do backend
 
 Após definir o diretório aplique o seguinte prompt:
 
-  docker compose up -d --build
+    docker compose up -d --build
 
 Nesta etapa 4 containers serão criados:
   * Postgres;
