@@ -15,6 +15,8 @@ A aplicação foi containerizada utilizando Docker Compose, atendendo aos requis
 
 O objetivo do trabalho foi estruturar a aplicação utilizando containers sem alterar a lógica original do sistema.
 
+Foi utilizada uma arquitetura baseada em Docker Compose porque ela permite padronizar o ambiente de execução, simplificar a implantação da aplicação, garantir reprodutibilidade entre diferentes máquinas e facilitar manutenção, atualização e escalabilidade. Dessa forma, o usuário precisa apenas executar docker compose up -d --build, sem instalar manualmente Python, Node.js, PostgreSQL ou suas dependências.
+
 ---
 
 # Arquitetura da Solução
