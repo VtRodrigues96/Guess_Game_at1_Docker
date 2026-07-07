@@ -1,157 +1,416 @@
-Aqui está um exemplo de um arquivo `README.md` para o seu jogo:
+# Guess Game - Docker Compose
+
+## Descrição
+
+Este projeto consiste na implementação do jogo de adivinhação disponibilizado em:
+
+https://github.com/fams/guess_game
+
+A aplicação foi containerizada utilizando Docker Compose, atendendo aos requisitos da atividade propostos para:
+
+- Backend Flask (Python)
+- Banco de dados PostgreSQL
+- Frontend React
+- NGINX atuando como servidor web, proxy reverso e balanceador de carga
+
+O objetivo do trabalho foi estruturar a aplicação utilizando containers sem alterar a lógica original do sistema.
+
+Foi utilizada uma arquitetura baseada em Docker Compose porque ela permite padronizar o ambiente de execução, simplificar a implantação da aplicação, garantir reprodutibilidade entre diferentes máquinas e facilitar manutenção, atualização e escalabilidade. Dessa forma, o usuário precisa apenas executar docker compose up -d --build, sem instalar manualmente Python, Node.js, PostgreSQL ou suas dependências.
 
 ---
 
-# Jogo de Adivinhação com Flask
+# Arquitetura da Solução
 
-Este é um simples jogo de adivinhação desenvolvido utilizando o framework Flask. O jogador deve adivinhar uma senha criada aleatoriamente, e o sistema fornecerá feedback sobre o número de letras corretas e suas respectivas posições.
+A arquitetura é composta pelos seguintes serviços:
 
-## Funcionalidades
+## PostgreSQL
 
-- Criação de um novo jogo com uma senha fornecida pelo usuário.
-- Adivinhe a senha e receba feedback se as letras estão corretas e/ou em posições corretas.
-- As senhas são armazenadas  utilizando base64.
-- As adivinhações incorretas retornam uma mensagem com dicas.
-  
-## Requisitos
+Responsável pelo armazenamento dos dados do jogo.
 
-- Python 3.8+ - 3.12
-- Flask
-- Um banco de dados local (ou um mecanismo de armazenamento configurado em `current_app.db`)
-- node 18.17.0
+Características:
 
-## Instalação
+- Executado em container dedicado.
+- Persistência através de volume Docker.
+- Dados mantidos mesmo após reinicialização dos containers.
 
-1. Clone o repositório:
+---
 
-   ```bash
-   git clone https://github.com/fams/guess_game.git
-   cd guess-game
-   ```
+## Backend Flask
 
-2. Crie um ambiente virtual e ative-o:
+Responsável pelas regras de negócio do jogo.
 
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate  # Windows
-   ```
+Características:
 
-3. Instale as dependências:
+- Executado em containers independentes.
+- Conectado ao PostgreSQL.
+- Escalável através da criação de múltiplas instâncias.
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+Nesta implementação são executadas duas instâncias:
 
-4. Configure o banco de dados com as variáveis de ambiente no arquivo start-backend.sh
-    1. Para sqlite
+- backend-1
+- backend-2
 
-        ```bash
-            export FLASK_APP="run.py"
-            export FLASK_DB_TYPE="sqlite"            # Use SQLITE
-            export FLASK_DB_PATH="caminho/db.sqlite" # caminho do banco
-        ```
+---
 
-    2. Para Postgres
+## Frontend React
 
-        ```bash
-            export FLASK_APP="run.py"
-            export FLASK_DB_TYPE="postgres"       # Use postgres
-            export FLASK_DB_USER="postgres"       # Usuário do banco
-            export FLASK_DB_NAME="postgres"       # Nome do Banco
-            export FLASK_DB_PASSWORD="secretpass" # Senha do banco
-            export FLASK_DB_HOST="localhost"      # Hostname
-            export FLASK_DB_PORT="5432"           # Porta
-        ```
+Responsável pela interface do usuário.
 
-    3. Para DynamoDB
+Características:
 
-        ```bash
-        export FLASK_APP="run.py"
-        export FLASK_DB_TYPE="dynamodb"       # Use postgres
-        export AWS_DEFAULT_REGION="us-east-1" # AWS region
-        export AWS_ACCESS_KEY_ID="FAKEACCESSKEY123456" 
-        export AWS_SECRET_ACCESS_KEY="FakeSecretAccessKey987654321"
-        export AWS_SESSION_TOKEN="FakeSessionTokenABCDEFGHIJKLMNOPQRSTUVXYZ1234567890"
-        ```
+- Aplicação React compilada para produção.
+- Arquivos estáticos servidos pelo NGINX.
 
-5. Execute o backend
+---
 
-   ```bash
-   ./start-backend.sh &
-   ```
+## NGINX
 
-6. Cuidado! verifique se o seu linux está lendo o arquivo .sh com fim de linha do windows CRLF. Para verificar utilize o vim -b start-backend.sh
+Responsável por:
 
-## Frontend
-No diretorio de frontend
+- Servir os arquivos do frontend React.
+- Atuar como proxy reverso.
+- Realizar balanceamento de carga entre múltiplas instâncias do backend.
 
-1. Instale o node com o nvm. Se não tiver o nvm instalado, siga o [tutorial](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
+Fluxo da aplicação:
 
-    ```bash
-    nvm install 18.17.0
-    nvm use 18.17.0
-    # Habilite o yarn
-    corepack enable
-    ```
+```text
+Usuário
+   ↓
+ NGINX
+   ↓
+Backend Flask (1)
+Backend Flask (2)
+   ↓
+ PostgreSQL
+```
 
-2. Instale as dependências do node com o npm:
+---
 
-    ```bash
-    npm install
-    ```
+# Decisões de Design
 
-3. Exporte a url onde está executando o backend e execute o backend.
+## Utilização do PostgreSQL
 
-   ```bash
-    export REACT_APP_BACKEND_URL=http://localhost:5000
-    yarn start
-   ```
+Foi utilizado PostgreSQL por ser um banco relacional robusto e amplamente utilizado em ambientes corporativos.
 
-## Como Jogar
+---
 
-### 1. Criar um novo jogo
+## Persistência dos Dados
 
-Acesse a url do frontend http://localhost:3000
+Foi criado um volume Docker dedicado para o banco de dados.
 
-Digite uma frase secreta
+Benefícios:
 
-Envie
+- Persistência dos dados após reinicialização.
+- Independência entre dados e containers.
+- Facilidade de manutenção.
 
-Salve o game-id
+---
 
+## Balanceamento de Carga
 
-### 2. Adivinhar a senha
+O NGINX foi configurado como proxy reverso para distribuir as requisições entre múltiplas instâncias do backend.
 
-Acesse a url do frontend http://localhost:3000
+Benefícios:
 
-Vá para o endponint breaker
+- Melhor distribuição das requisições.
+- Maior disponibilidade da aplicação.
+- Facilidade para escalar novos containers.
 
-entre com o game_id que foi gerado pelo Creator
+---
 
-Tente adivinhar
+## Facilidade de Atualização
 
-## Estrutura do Código
+Cada componente é independente.
 
-### Rotas:
+Isso permite atualizar:
 
-- **`/create`**: Cria um novo jogo. Armazena a senha codificada em base64 e retorna um `game_id`.
-- **`/guess/<game_id>`**: Permite ao usuário adivinhar a senha. Compara a adivinhação com a senha armazenada e retorna o resultado.
+- Backend
+- Frontend
+- Banco de Dados
 
-### Classes Importantes:
+apenas alterando a versão da imagem correspondente e reconstruindo os containers.
 
-- **`Guess`**: Classe responsável por gerenciar a lógica de comparação entre a senha e a tentativa do jogador.
-- **`WrongAttempt`**: Exceção personalizada que é levantada quando a tentativa está incorreta.
+---
 
+# Estrutura do Projeto
 
+```text
+.
+├── backend/
+├── frontend/
+├── nginx/
+├── docker-compose.yml
+├── README.md
+```
 
-## Melhorias Futuras
+---
 
-- Implementar autenticação de usuário para salvar e carregar jogos.
-- Adicionar limite de tentativas.
-- Melhorar a interface de feedback para as tentativas de adivinhação.
+# Pré-requisitos
 
-## Licença
+É necessário possuir instalado:
 
-Este projeto está licenciado sob a [MIT License](LICENSE).
+- Docker
+- Docker Compose
 
+Verificação:
+
+```bash
+docker --version
+docker compose version
+```
+
+---
+
+# Instalação
+
+## 1. Clonar o repositório
+
+```bash
+git clone https://github.com/VtRodrigues96/Guess_Game_at1_Docker.git
+cd Guess_Game_at1_Docker
+```
+
+---
+
+## 2. Construir e iniciar os containers
+
+```bash
+docker compose up -d --build
+```
+
+Serão criados os seguintes containers:
+
+- postgres
+- backend-1
+- backend-2
+- nginx
+
+---
+
+## 3. Verificar os containers
+
+```bash
+docker ps
+```
+
+Todos os containers devem estar com status:
+
+```text
+Up
+```
+
+---
+
+# Acesso à Aplicação
+
+Após a execução do comando:
+
+```bash
+docker compose up -d --build
+```
+
+A aplicação estará disponível em:
+
+```text
+http://localhost
+```
+
+Esta é a URL que deve ser utilizada para acessar o sistema.
+
+---
+
+# Utilização pela Interface Web
+
+1. Acesse:
+
+```text
+http://localhost
+```
+
+2. Clique em:
+
+```text
+Create a Game
+```
+
+3. Informe uma senha.
+
+4. O sistema retornará um Game ID.
+
+5. Utilize o Game ID para realizar tentativas de adivinhação.
+
+---
+
+# Utilização pela API
+
+## Criar um jogo
+
+```bash
+curl -X POST http://localhost/api/create \
+-H "Content-Type: application/json" \
+-d '{"password":"teste123"}'
+```
+
+Exemplo de retorno:
+
+```json
+{
+  "game_id": "abc123"
+}
+```
+
+---
+
+## Realizar uma tentativa
+
+```bash
+curl -X POST http://localhost/api/guess/<GAME_ID> \
+-H "Content-Type: application/json" \
+-d '{"guess":"teste123"}'
+```
+
+Substitua:
+
+```text
+<GAME_ID>
+```
+
+pelo identificador retornado na criação do jogo.
+
+---
+
+# Consulta ao Banco de Dados
+
+## Acessar o PostgreSQL
+
+```bash
+docker exec -it postgres psql -U postgres -d postgres
+```
+
+---
+
+## Listar tabelas
+
+```sql
+\dt
+```
+
+---
+
+## Consultar os jogos armazenados
+
+```sql
+SELECT * FROM game;
+```
+
+---
+
+## Consultar um jogo específico
+
+```sql
+SELECT *
+FROM game
+WHERE game_id = '<GAME_ID>';
+```
+
+---
+
+## Sair do PostgreSQL
+
+```sql
+\q
+```
+
+---
+
+# Resiliência
+
+A solução foi configurada para atender aos requisitos de resiliência da atividade.
+
+## Reinício Automático
+
+Todos os containers utilizam:
+
+```yaml
+restart: always
+```
+
+Dessa forma, caso ocorra falha em algum container, ele será reiniciado automaticamente.
+
+---
+
+## Persistência
+
+O PostgreSQL utiliza volume dedicado para armazenamento permanente dos dados.
+
+---
+
+## Balanceamento de Carga
+
+O NGINX distribui as requisições entre múltiplas instâncias do backend.
+
+---
+
+# Atualização dos Componentes
+
+A arquitetura permite atualização independente dos serviços.
+
+## Atualizar PostgreSQL
+
+Alterar a versão da imagem:
+
+```yaml
+image: postgres:15
+```
+
+Exemplo:
+
+```yaml
+image: postgres:16
+```
+
+---
+
+## Atualizar Backend
+
+Atualizar a imagem do backend e reconstruir:
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+## Atualizar Frontend
+
+Gerar um novo build React e reconstruir:
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+# Atendimento aos Requisitos da Atividade
+
+| Requisito | Status |
+|-----------|---------|
+| Backend Flask em container | ✔ |
+| PostgreSQL em container | ✔ |
+| NGINX em container | ✔ |
+| Frontend servido pelo NGINX | ✔ |
+| Proxy reverso | ✔ |
+| Balanceamento de carga | ✔ |
+| Persistência via volume | ✔ |
+| Reinício automático | ✔ |
+| Facilidade de atualização | ✔ |
+| Docker Compose | ✔ |
+| README de instalação e utilização | ✔ |
+
+---
+
+# Autor
+
+Vitor Rodrigues
+
+Projeto desenvolvido para a atividade 1 de Docker utilizando o projeto Guess Game.
