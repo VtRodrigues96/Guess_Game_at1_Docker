@@ -355,22 +355,6 @@ O NGINX distribui as requisições entre múltiplas instâncias do backend.
 
 A arquitetura permite atualização independente dos serviços.
 
-## Atualizar PostgreSQL
-
-Alterar a versão da imagem:
-
-```yaml
-image: postgres:15
-```
-
-Exemplo:
-
-```yaml
-image: postgres:16
-```
-
----
-
 ## Atualizar Backend
 
 Atualizar a imagem do backend e reconstruir:
